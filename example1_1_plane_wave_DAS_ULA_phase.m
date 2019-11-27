@@ -94,8 +94,6 @@ r = (1:exct.n_sampl)';
 im = plane_wave_DAS_ULA_phs(array, arrayRes, theta, r, wave, exct) ;
 
 
-
-
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % 
 %                      Plot the results 

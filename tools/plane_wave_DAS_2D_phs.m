@@ -54,7 +54,9 @@ for i = 1:length (theta)
    end
 %    and sum
    resp = sum(Res2);
-   C_coh = std(Res2);
+   C_coh =std(angle( Res2.*exp(-1i*angle(mean(Res2)))));
+   C_coh = 1 - C_coh; 
+   C_coh(C_coh<=0) = 1e-12;
    
     %% phase  shift approach 
    % calculate delay in radians 
@@ -62,14 +64,16 @@ for i = 1:length (theta)
 %    delayRad = 2*pi*( array.X .* cosd(theta(i)) * 1e-3 / wave.vph * exct.f_exc);
    % apply the phase shift 
    Res3 = diag(exp(-1i.*delayRad))*Res;
-   Cphs_coh = std(Res3);
+   Cphs_coh =std(angle( Res3.*exp(-1i*angle(mean(Res3)))));
+   Cphs_coh = 1 - Cphs_coh; 
+   Cphs_coh(Cphs_coh<=0) = 1e-12;
 %    figure(3), plot(real(Res3)'), xlim([500 1200]), drawnow
    
    im.C(i,:) = abs(sum(Res2));
-   im.coh_C(i,:) = 1-(C_coh);
+   im.coh_C(i,:) = C_coh;
    
    im.Cphs(i,:) = abs(sum(Res3));
-   im.coh_Cphs(i,:) = 1-(Cphs_coh);
+   im.coh_Cphs(i,:) = Cphs_coh;
    
    
    clc, disp(['calculating DAS: ' num2str(i/length (theta) *100), '%'])

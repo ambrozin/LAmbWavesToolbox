@@ -4,7 +4,7 @@ Res = zeros(size(array.u,1), size(array.X,2), exct.n_sampl);
 
 for j = 1: size(array.u,1)
     % source to target disance
-    d1 = sqrt((array.X(array.u(j,:)>0)-target.x).^2 + (array.Y(array.u(j,:)>0)-target.x).^2);
+    d1 = sqrt((array.X(array.u(j,:)>0)-target.x).^2 + (array.Y(array.u(j,:)>0)-target.y).^2);
     for i = 1:size(array.X,2)
         
         % target to detector disance

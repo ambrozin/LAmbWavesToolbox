@@ -68,7 +68,7 @@ wave.lambda = wave.vph / f_vec(indF);       % wavelength in m for excitation fre
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 target.r = 300;
-target.theta = 50;
+target.theta = 90;
 target.x = target.r*cosd(target.theta); 
 target.y = target.r*sind(target.theta); 
 
@@ -91,7 +91,7 @@ arrayRes = simulate_array_response(array.X,array.Y,target, exct,f_vec,k_a, k_s);
 theta = 0:360;                      % azimuth in deg
 r = (1:exct.n_sampl)';
 
-im = plane_wave_DAS_ULA_phs(array, arrayRes, theta, r, wave, exct) ;
+im = plane_wave_DAS_ULA(array, arrayRes, theta, r, wave, exct) ;
 
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % 
@@ -100,10 +100,7 @@ im = plane_wave_DAS_ULA_phs(array, arrayRes, theta, r, wave, exct) ;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
-figure(9)
-pcolor(im.x, im.y, im.Cphs'), shading flat, axis equal tight, axis([-1500, 1500, -1500,1500])
-title('DAS - phase shift')
-colorbar 
+
 
 figure(10)
 pcolor(im.x, im.y, im.C'), shading flat, axis equal tight, axis([-1500, 1500, -1500,1500])
@@ -111,7 +108,6 @@ title('DAS result')
 colorbar 
 
 % return
-
 figure(11)
 pcolor(im.x, im.y, im.coh_C'), shading flat, axis equal tight, axis([-1500, 1500, -1500,1500])
 title('weights based on Phase coherence ')

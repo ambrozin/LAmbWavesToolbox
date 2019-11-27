@@ -44,12 +44,17 @@ for i = 1:length (theta)
    end
 %    and sum
    resp = sum(Res2);
-   respPhs = std(Res2);
+   
+   Cphs_coh =std(angle( Res2.*exp(-1i*angle(mean(Res2)))));
+   Cphs_coh = 1 - Cphs_coh; 
+   Cphs_coh(Cphs_coh<=0) = 1e-12;
+ 
    
 %    figure(3), plot(real(Res2)'), drawnow
    
    im.C(i,:) = abs(resp);
-   im.Cph(i,:) = 1-(respPhs);
+%    im.Cph(i,:) = 1-(respPhs);
+   im.coh_C  (i,:) = Cphs_coh;
    
 %  figure(4), pcolor(im.x, im.y, im.C'), shading interp, drawnow
     clc, disp(['calculating DAS: ' num2str(i/length (theta) *100), '%'])

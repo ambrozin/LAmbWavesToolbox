@@ -6,10 +6,16 @@ function im = plane_wave_DAS_sparse(array, Res, theta, r, wave, exct)
 %  im = plane_wave_DAS_2D(array, Res, theta, r, wave, exct)
 %
 % where:
-% im - structure with
-%         im.C        - DAS result
-%         im.Cph      - standard deviation of phase at subsequent points
-%         im.x, im.y  - x,y vectors to scale the images
+%  DAS result: 
+%         im.C         % discrete-time C
+%         
+% 
+%         COHERENCE  - standard deviation of phase at subsequent points 
+%         im.coh_C        % coherence calculated in discrete time 
+%      
+%         
+%         GEOMETRY
+%         im.x, im.y  - x,y vectors to scale the images 
 %
 % array - structure of array parameters
 %         array.X, array.Y - coordinates of array elements
@@ -44,21 +50,45 @@ for i = 1:length (theta)
         % delay for receivers
         delayR = round( (array.X .* cosd(theta(i)) + array.Y .* sind(theta(i)))...
             * 1e-3 / wave.vph * exct.fs);
-         delayT = round( (array.X(array.u(j,:)==1) .* cosd(theta(i)) + array.Y(array.u(j,:)==1) .* sind(theta(i)))...
+         delayT = round( (array.X(array.u(j,:)>0) .* cosd(theta(i)) + array.Y(array.u(j,:)>0) .* sind(theta(i)))...
             * 1e-3 / wave.vph * exct.fs);
         
+        apodiz = array.u(j,array.u(j,:)>0) .* array.v(j,:); 
+        
         for k = 1:length(delayR)
-            Res2(k + (j-1).*size(Res,2),:) = circshift(Res(j,k,:),delayR(k) + delayT );
+            Res2(k + (j-1).*size(Res,2),:) = circshift(Res(j,k,:).*apodiz(k),delayR(k) + delayT );
         end
         %    and sum
-        resp = sum(Res2);
-        respPhs = std(Res2);
+%        figure(232), plot(apodiz)
+    end
+    
+     resp = sum(Res2);
+
+    C_coh =std(angle( Res2.*exp(-1i*angle(mean(Res2)))));
+    C_coh = 1 - C_coh; 
+  	C_coh(C_coh<=0) = 1e-12;
         
-           figure(3), plot(real(Res2)'), drawnow
-           figure(3), plot(real(Res2)'), drawnow
+%            figure(3), plot(real(Res2([4:6],:))'), drawnow
+%            figure(3), plot(real(Res2)'), drawnow
         
         im.C(i,:) = (resp);
-        im.Cph(i,:) = 1-(respPhs);
+        im.coh_C(i,:) = C_coh;
         clc, disp(['calculating DAS: ' num2str(i/length (theta) *100), '%'])
-    end
 end
+return
+%%
+
+phs2 = Res2(:,1482); 
+
+phs3 = phs2*exp(-1i*angle(mean(phs2)));
+std(angle(phs2))
+
+
+phs4 = Res2.*exp(-1i*angle(mean(Res2)));
+
+figure(323) 
+plot(std(angle(phs3)), '.')
+
+
+
+

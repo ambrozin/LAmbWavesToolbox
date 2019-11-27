@@ -6,5 +6,5 @@ for i = 1:size(X,2)
         resp_a = dispResponse(f_vec,k_a,exct.fs,exct.n_sampl,exct.f_exc,exct.n_cycl,d);
 %         resp_s = dispResponse(f_vec,k_s,exct.fs,exct.n_sampl,exct.f_exc,exct.n_cycl,d);
         Res(i,:) =  hilbert(resp_a );
-    disp(i/size(X,2)*100)
+    clc, disp(['Simulating array response: ' num2str(i/size(X,2)*100), '%'])
 end

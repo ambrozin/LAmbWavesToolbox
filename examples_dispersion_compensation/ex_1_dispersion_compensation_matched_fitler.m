@@ -49,11 +49,16 @@ wave.lambda = wave.vph / f_vec(indF);       % wavelength in m for excitation fre
 d = 300;
 
 [resp_a t sig] = dispResponse(f_vec,k_a,exct.fs,exct.n_sampl,exct.f_exc,exct.n_cycl,d);
-figure(1), plot(t,sig,t,resp_a)
+figure(1), plot(t,sig,t,resp_a), 
+xlabel('time [s]')
+legend('excitation','response')
 
+% perform backpropagation (time reversal)
 [resp2] = dispResponseArb(f_vec,k_a,exct.fs,fliplr(resp_a),d); 
 figure(2), plot(t,fliplr(resp2))
-%%
+xlabel('time [s]')
+title('time-reveresed response; compare against the excitation')
+%% cross-corelate a set of simulated response with the previous signal example 
 
 dist = 100:500; 
 
@@ -66,8 +71,7 @@ for i = 1: length(dist)
     
 end
 
-%%
-
 figure(232)
 plot(dist,R(ceil(size(R,1)/2),:))
 xlabel('distance [mm]')
+ylabel('Correlation coeff')

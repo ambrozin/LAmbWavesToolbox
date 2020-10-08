@@ -1,4 +1,4 @@
-function resp_a = dispResponse(f_vec,k_a,fs,n_sampl,f_exc,n_cycl,x)
+function [resp_a varargout] = dispResponse(f_vec,k_a,fs,n_sampl,f_exc,n_cycl,x)
 %
 % function resp_a = dispResponse(f_vec,k_a,fs,n_sampl,f_exc,n_cycl,x)
 % 
@@ -39,3 +39,5 @@ StimesGa=S.*G_a;
 
 
 resp_a=ifft(StimesGa);  
+varargout{1} = t; 
+varargout{2} = sign;

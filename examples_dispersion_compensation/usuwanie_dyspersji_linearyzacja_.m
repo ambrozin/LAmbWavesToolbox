@@ -1,3 +1,7 @@
+%%
+%
+%       this script probaly does not work.
+%%
 %% input data
     meas=(pas_measurement(3).measurement(1600:2800));
     meas=[meas zeros(1,8048-length(meas))];

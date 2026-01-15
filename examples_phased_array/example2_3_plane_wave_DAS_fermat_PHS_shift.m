@@ -34,7 +34,7 @@ end
 %    Fermat spiral  
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-N = 32;       % l-ba elementow
+N = 64;       % l-ba elementow
 D = 80;       % srednica zewnetrzna
 alpha = 137.51*pi/180;  %kat
 % alpha = 15*pi/180;
@@ -58,9 +58,11 @@ array.name = 'fermat';
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % plot array elements 
-figure(2),  plot(array.X,array.Y,'s'), 
+figure(2),  plot(array.X,array.Y,'.'), 
 xlabel('x [mm]'), ylabel('y [mm]')
 title(array.name)
+axis equal
+return
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % 
 %                           signal parameters 
@@ -89,7 +91,7 @@ target.x = target.r*cosd(target.theta);
 target.y = target.r*sind(target.theta); 
 
 figure(2),  plot(array.X,array.Y,'s', target.x,target.y,'*'),  xlabel('x [mm]')
-
+axis equal
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % 
 %       Simulate array responses using structure's transfer function

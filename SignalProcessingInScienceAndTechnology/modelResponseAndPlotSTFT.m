@@ -1,0 +1,207 @@
+% 
+% clear all 
+% close all
+
+load('alu_DispersionCurves')  
+
+% Assign variables to the dispersion curves and make a plot 
+
+
+f_A0 = A{:,1};      % frequency of A0 mode
+v_A0 = A{:,2};      % phase velcity of A0 mode
+vg_A0 = A{:,3};      % phase velcity of A0 mode
+k_A0 = A{:,10};
+f_A1 = A{:,12};      % frequency of A1 mode
+v_A1 = A{:,13};      % phase velcity of A1 mode
+vg_A1 = A{:,14};      % phase velcity of A1 mode
+f_S0 = S{:,1};      % frequency of S0 mode
+v_S0 = S{:,2};      % phase velcity of S0 mode
+k_S0 = S{:,10};
+vg_S0 = S{:,3};      % phase velcity of A0 mode
+
+figure(1)
+subplot(121)
+plot(f_A0,v_A0, f_A1, v_A1, f_S0, v_S0)
+xlabel('frequency \times thickness (kHz\cdot mm)')
+ylabel('Phase velocity (km/s)')
+legend('A_0', 'A_1', 'S_0')
+subplot(122)
+plot(f_A0,vg_A0, f_A1, vg_A1, f_S0, vg_S0)
+xlabel('frequency \times thickness (kHz\cdot mm)')
+ylabel('Group velocity (km/s)')
+legend('A_0', 'A_1', 'S_0')
+
+%%  Simukate the response 
+exct.fs = 10e6;                % sampling f 
+exct.n_sampl = 4096;            % no of samples
+exct.f_exc = 1155e3;             % excitation f
+exct.n_cycl = 10;                % no of cycles
+
+[f_vec,k_a, k_s ] = interpolate_wavenumbers(exct,f_A0, k_A0,f_S0,k_S0  ); 
+
+
+%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% 
+%       Simulate  responses using structure's transfer function
+%                          
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+propagationDistance = 350;  %propagation distance[mm ]
+
+[resp_a t sig] = dispResponse(f_vec,k_a,exct.fs,exct.n_sampl,exct.f_exc,exct.n_cycl,propagationDistance);
+[resp_s t sig] = dispResponse(f_vec,k_s,exct.fs,exct.n_sampl,exct.f_exc,exct.n_cycl,propagationDistance);
+response = resp_a+ resp_s;          % superposition of s and a modes 
+figure(2), plot(t,sig,t,response), 
+xlabel('time [s]')
+legend('excitation','response')
+
+
+% create envelopes for the signals 
+% Calculate the envelope of the response signal
+envResp= abs(hilbert(response)); 
+envExct= abs(hilbert(sig)); 
+
+figure(3)
+plot(t,sig,'-', t,envExct,'--', t,response,'-', t,envResp,'--')
+xlabel('time [s]')
+legend('excitation','env excitation','response','env response','Location','best')
+grid on
+axis tight
+
+[w indEx] = max(envExct); 
+[pks locs] = findpeaks(envResp, "NPeaks",2,"MinPeakDistance",100, 'SortStr','descend'); 
+
+% Calculate the time difference between peaks in the excitation envelope
+timeDiff1 = (locs(1)-indEx) / exct.fs; 
+vg1 = propagationDistance/timeDiff1/1e6;
+timeDiff2 = (locs(2)-indEx) / exct.fs; 
+vg2 = propagationDistance/timeDiff2/1e6;
+disp('Ggroup velocity of the first mode is (km/s):');
+disp(vg1);
+disp('Ggroup velocity of the second mode is (km/s):');
+disp(vg2);
+
+%%
+
+%%  Simulate a broad-band response 
+exct.fs = 10e6;               % sampling f 
+exct.n_sampl = 8196;            % no of samples
+exct.f_exc = 1000e3;             % excitation f
+exct.n_cycl = 1;                % no of cycles
+
+[resp_a t sig] = dispResponse(f_vec,k_a,exct.fs,exct.n_sampl,exct.f_exc,exct.n_cycl,propagationDistance);
+[resp_s t sig] = dispResponse(f_vec,k_s,exct.fs,exct.n_sampl,exct.f_exc,exct.n_cycl,propagationDistance);
+response = resp_a+ resp_s;          % superposition of s and a modes 
+figure(4), plot(t*1e6,sig,t,response), 
+xlabel('time (\mus)')
+legend('excitation','response')
+
+
+figure(323)
+spectrogram(response, 128,120,2048, exct.fs, 'onesided','yaxis')
+hold on 
+% plot group velocity
+plot(propagationDistance./vg_A0, f_A0/1e3)
+plot(propagationDistance./vg_S0, f_S0/1e3)
+xlim([0 500])
+ylim([0 4])
+% plot(d/A0_vg, f_A0)
+hold off
+legend( 'A_0', 'S_0')
+title(' Spectrogram')
+
+figure(324)
+spectrogram(response, 128,120,2048, exct.fs, 'onesided','yaxis', 'reassigned')
+hold on 
+% plot group velocity
+plot(d./vg_A0, f_A0/1e3, 'k--', 'LineWidth',2)
+plot(d./vg_S0, f_S0/1e3, 'w-.', 'LineWidth',2)
+xlim([0 500])
+ylim([0 5])
+% plot(d/A0_vg, f_A0)
+hold off
+legend( 'A_0', 'S_0')
+title('Reassigned spectrogram')
+
+%%
+
+% function [f_vec,k_a, k_s ] = interpolate_wavenumbers(exct,f_A0, k_A0,f_S0,k_S0  )
+% df = exct.fs*2 / exct.n_sampl;
+% f_sim = (0:exct.n_sampl-1)' * df;        % column vector, 0..fs-df
+% 
+% % Original dispersion data use f_vec (Hz) and k_a, k_s (rad/m) from loaded file.
+% % Interpolate k vectors onto f_sim. Use NaN for out-of-range values then fill with nearest.
+% k_a_sim = interp1(f_A0*1e3, k_A0*1e3, f_sim, 'pchip', NaN);
+% k_s_sim = interp1(f_S0*1e3, k_S0*1e3, f_sim, 'pchip', NaN);
+% 
+% % Fill NaNs at ends by nearest valid value to avoid gaps in further processing
+% if any(isnan(k_a_sim))
+%     valid = find(~isnan(k_a_sim));
+%     if ~isempty(valid)
+%         k_a_sim(1:valid(1)-1) = k_a_sim(valid(1));
+%         k_a_sim(valid(end)+1:end) = k_a_sim(valid(end));
+%     end
+% end
+% if any(isnan(k_s_sim))
+%     valid = find(~isnan(k_s_sim));
+%     if ~isempty(valid)
+%         k_s_sim(1:valid(1)-1) = k_s_sim(valid(1));
+%         k_s_sim(valid(end)+1:end) = k_s_sim(valid(end));
+%     end
+% end
+% 
+% % Save interpolated vectors into variables expected later (f_vec, k_a, k_s)
+% % Overwrite f_vec to the simulation frequency grid and ensure column orientation
+% f_vec = f_sim;
+% k_a = k_a_sim;
+% k_s = k_s_sim;
+% 
+% end
+
+
+
+%%
+% function [resp_a varargout] = dispResponse(f_vec,k_a,fs,n_sampl,f_exc,n_cycl,x)
+% %
+% % function resp_a = dispResponse(f_vec,k_a,fs,n_sampl,f_exc,n_cycl,x)
+% % 
+% % function to generate a dispersive response based on input data: 
+% % f_vec, k_a - dispersion curves in form of f, k pairs 
+% % fs      - sampling frequency
+% % n_sampl - number of samples
+% % f_exct  - excitation frequency 
+% % n_cycl  - number of periods in the excitation signal
+% % x       - propagation distance
+% % 
+% %   09.2019 L. Ambrozinski ambrozin@agh.edu.pl
+% 
+% 
+% 
+% t = [0:(n_sampl-1)]./fs;           % time vector
+% 
+% N_win = round(n_cycl/f_exc*fs);
+% w = window(@hann,N_win);
+% win = zeros(1,length(t));
+% win(1:length(w)) = w;
+% sign = sin(2*pi*f_exc*t).*win ;
+% 
+% 
+% S = fft(sign);
+% df = fs/ n_sampl;
+% f = 0:df:fs-df;
+% f=f(1:end/2+1);
+% 
+% % interpolate dispersion curve to have values where FT samples are
+% k_int_a=interp1(f_vec,k_a,f);       k_int_a(end)=0;
+% 
+% % Create structure's transfer function     
+% G_a=[ exp(1).^(-i.*k_int_a.*x*1e-3) exp(1).^(i.*fliplr(k_int_a(2:end-1)).*x*1e-3)];
+% 
+% % convolve and inverse Fourier transform 
+% StimesGa=S.*G_a; 
+% 
+% 
+% resp_a=real(ifft(StimesGa));  
+% varargout{1} = t; 
+% varargout{2} = real(sign);
+% end

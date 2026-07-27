@@ -36,7 +36,8 @@ end
 %    ULA   
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 array.dx = 6.5;               % pitch in mm
-x = (1:10).*array.dx;         x = x - mean(x);
+nels = 10; 
+x = (1:nels).*array.dx;         x = x - mean(x);
 y = zeros(size(x));
 
 array.X = x;                  array.Y = y; 
@@ -69,14 +70,15 @@ wave.lambda = wave.vph / f_vec(indF);       % wavelength in m for excitation fre
 % 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-target.r = [300 200];
-target.theta = [90 60];
-target.reflectivity = [1 0.5];
+target.r = [ 400];
+target.theta = [ 60];
+target.reflectivity = [ 0.5];
 target.x = target.r.*cosd(target.theta); 
 target.y = target.r.*sind(target.theta); 
 
 figure(2),  plot(array.X,array.Y,'s', target.x,target.y,'*'),  xlabel('x [mm]')
-
+xlim([-500 500])
+ylim([-500 500])
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % 
 %       Simulate array responses using structure's transfer function
@@ -91,10 +93,10 @@ arrayRes = simulate_array_response(array.X,array.Y,target, exct,f_vec,k_a, k_s,'
 %                          
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-theta = 0:360;                      % azimuth in deg
+theta = 0:180;                      % azimuth in deg
 r = (1:exct.n_sampl)';
 
-im = plane_wave_DAS_ULA(array, arrayRes, theta, r, wave, exct) ;
+im = plane_wave_DAS_ULA(array, arrayRes.*rectwin(nels), theta, r, wave, exct) ;
 
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % 
@@ -106,11 +108,12 @@ im = plane_wave_DAS_ULA(array, arrayRes, theta, r, wave, exct) ;
 
 
 figure(10)
-pcolor(im.x, im.y, im.C'), shading flat, axis equal tight, axis([-1500, 1500, -1500,1500])
+pcolor(im.x, im.y, 20*log10(im.C')), shading flat, axis equal tight, axis([-1500, 1500, -0,1500])
 title('DAS result')
 colorbar 
-
-% return
+caxis([-20 0]+max(caxis))
+colormap gray
+return
 figure(11)
 pcolor(im.x, im.y, im.coh_C'), shading flat, axis equal tight, axis([-1500, 1500, -1500,1500])
 title('weights based on Phase coherence ')

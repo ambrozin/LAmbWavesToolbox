@@ -45,7 +45,7 @@ im.Cphs = zeros(size(im.x,2), size(im.x,1));        % phase-shift C
 im.coh_C = zeros(size(im.x,2), size(im.x,1));       % coherence calculated in discrete time 
 im.coh_Cphs = zeros(size(im.x,2), size(im.x,1));    % coherence calculated using phase shift
 
-disp('calculating DAS.... ')
+% disp('calculating DAS.... ')
 for i = 1:length (theta) 
     
    %% digital shift approach 
@@ -55,12 +55,38 @@ for i = 1:length (theta)
    for j = 1:length(delaySampl) 
         Res2(j,:) = circshift(Res(j,:),delaySampl(j)); 
    end
+   % figure(1), 
+   
 %    and sum
    resp = sum(Res2);
    C_coh =std(angle( Res2.*exp(-1i*angle(mean(Res2)))));
    C_coh = 1 - C_coh; 
-   C_coh(C_coh<=0) = 1e-12;
-
+   % C_coh(C_coh<=0) = 1e-12;
+% subplot(2,3,1:2)
+%    plot(real(Res2.'))
+%    xlabel('Samples (n)')
+%    xlim([0 1000])
+%    subplot(2,3,4:5)
+%    plot(real(sum(Res2))), hold on 
+%    plot(abs(sum(Res2))), hold off
+%    xlabel('Samples (n)')
+%    ylim([-1 1]*20)
+%    xlim([0 1000])
+%    BP(i) = max(abs(sum(Res2)));
+%    subplot(2,3,3)
+%    plot((theta(1:i)), BP(1:i))
+%    xlim([0 180])
+%    ylim([0 20])
+%    xlabel('Angle (deg)')
+   %    subplot(2,3,6)
+   %    BC(i)  = max(C_coh);
+   % plot((theta(1:i)), BC(1:i))
+   % xlim([0 180])
+   % % ylim([0 20])
+   % xlabel('Angle (deg)')
+   % ylim([1 2.5])
+   % ylabel('\sigma (phase)')
+   % drawnow
    
    %% phase  shift approach 
    % calculate delay in radians 
@@ -69,8 +95,9 @@ for i = 1:length (theta)
    Res3 = diag(exp(-1i.*delayRad))*Res;
 
    Cphs_coh =std(angle( Res3.*exp(-1i*angle(mean(Res3)))));
-   Cphs_coh = 1 - Cphs_coh; 
-   Cphs_coh(Cphs_coh<=0) = 1e-12;
+   % Cphs_coh = 1 - Cphs_coh; 
+   % Cphs_coh = Cphs_coh./max(Cphs_coh);
+   % Cphs_coh(Cphs_coh<=0) = 1e-12;
 %    figure(3), plot(real(Res3)'), xlim([500 1200]), drawnow
    
    %% make images form the results
@@ -81,6 +108,6 @@ for i = 1:length (theta)
    im.coh_Cphs(i,:) = Cphs_coh;
    
 %  figure(4), pcolor(im.x, im.y, im.C'), shading interp, drawnow
-    clc, disp(['calculating DAS: ' num2str(i/length (theta) *100), '%'])
+    % clc, disp(['calculating DAS: ' num2str(i/length (theta) *100), '%'])
 end
 disp('done')

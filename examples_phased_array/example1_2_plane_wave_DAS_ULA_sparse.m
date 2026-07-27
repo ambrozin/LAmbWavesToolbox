@@ -12,7 +12,7 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 clear all
-close all
+% close all
 
 % windows, or MAC
 try, addpath('..\tools');   catch, addpath('../tools') , end
